@@ -1,5 +1,5 @@
 import { isEmpty } from 'lodash'
-import React, { ReactElement, ReactNode, useCallback, useEffect, useState } from 'react'
+import React, { ReactElement, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import InfiniteScroll from 'react-infinite-scroller'
 import styled from 'styled-components'
 
@@ -38,8 +38,14 @@ const InfiniteScrollList = <T,>({
   const [loading, setLoading] = useState<boolean>(false)
   const [page, setPage] = useState<number>(defaultPage)
   const [hasMore, setHasMore] = useState<boolean>(true)
+  const throttling = useRef(false)
+  const REQUEST_TIMEOUT = 400
 
   const load = useCallback(async () => {
+    if (throttling.current) {
+      return
+    }
+
     if (hasMore) {
       setLoading(true)
       setPage(page + 1)
@@ -52,7 +58,12 @@ const InfiniteScrollList = <T,>({
           }
         }
       }
-      await loadFromEndpoint(request, addData, setError, setLoading)
+      throttling.current = true
+
+      await setTimeout(() => {
+        throttling.current = false
+        return loadFromEndpoint(request, addData, setError, setLoading)
+      }, REQUEST_TIMEOUT)
     }
   }, [page, hasMore, itemsPerPage, loadPage])
 

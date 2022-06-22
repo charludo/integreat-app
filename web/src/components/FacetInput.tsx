@@ -56,6 +56,7 @@ const FacetInput: React.FC<FacetInputProps> = ({
       placeholder={placeholder}
       type='number'
       onChange={evt => updateSearchFilter(evt.target.name, evt.target.value)}
+      onWheel={(e: any) => e.target.blur()}
     />
   </FilterFacet>
 )
